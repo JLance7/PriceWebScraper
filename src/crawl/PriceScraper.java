@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -55,7 +56,7 @@ public class PriceScraper {
     }
 
     //connect to URLs and scrape the prices
-    void scrapeAmazon(){
+    void scrapeAmazon() {
         String amazonPrice = null;
         String amazonCents = null;
         String total = null;
@@ -72,15 +73,19 @@ public class PriceScraper {
                 Elements select2 = amazonDoc.select("span.a-price-fraction");
                 amazonCents = select2.get(i).text();
                 total = amazonPrice + amazonCents;
-                Elements select3 = amazonDoc.select("span.a-size-medium.a-color-base.a-text-normal");
+                Elements select3 = amazonDoc.select("a.a-link-normal.a-text-normal > span.a-size-base-plus.a-color-base.a-text-normal");
+                //there are two different tags for the name
+                if (select3.size() == 0){
+                    select3 = amazonDoc.select("a.a-link-normal.a-text-normal > span.a-size-medium.a-color-base.a-text-normal");
+                }
                 amazonName = select3.get(i).text();
                 double newTotal = Double.parseDouble(total);
                 amazonMap.put(amazonName, newTotal);
                 i++;
             }
 
-        } catch(Exception e){
-            System.out.println("An error occurred, Amazon could not search for this item.");
+        }catch (Exception e){
+            System.out.println("An error occurred searching with Amazon.");
         }
     }
 
@@ -103,7 +108,7 @@ public class PriceScraper {
             }
 
         } catch (Exception e){
-            System.out.println("An error occurred, BestBuy could not search for this item.");
+            System.out.println("An error occurred searching with BestBuy.");
         }
     }
 
@@ -130,7 +135,7 @@ public class PriceScraper {
             }
 
         } catch (Exception e){
-            System.out.println("An error occurred, Newegg could not search for this item.");
+            System.out.println("An error occurred searching with Newegg.");
         }
     }
 
@@ -139,6 +144,8 @@ public class PriceScraper {
         String bestAmazonName = null;
         String bestBestBuyName = null;
         String bestNeweggName = null;
+        String bestOverallName = null;
+        double bestOverallPrice = 0;
         double bestAmazonPrice = 0;
         double bestBestBuyPrice = 0;
         double bestNeweggPrice = 0;
@@ -155,9 +162,9 @@ public class PriceScraper {
                 bestAmazonPrice = entry.getValue();
                 bestAmazonName = entry.getKey();
             }
-            System.out.println(entry.getKey() + " for $" + entry.getValue());
+            System.out.println("$" + entry.getValue() + " " + entry.getKey());
         }
-        System.out.println("Lowest amazon price: " + bestAmazonName + " for $" + bestAmazonPrice);
+        System.out.println("Lowest amazon price: $" + bestAmazonPrice + " " + bestAmazonName);
 
         System.out.print("\nBestBuy Results:");
         System.out.println(" " + bestBuyURL);
@@ -170,9 +177,9 @@ public class PriceScraper {
                 bestBestBuyPrice = entry.getValue();
                 bestBestBuyName = entry.getKey();
             }
-            System.out.println(entry.getKey() + " for $" + entry.getValue());
+            System.out.println("$" + entry.getValue() + " " + entry.getKey());
         }
-        System.out.println("Lowest BestBuy price: " + bestBestBuyName + " for $" + bestBestBuyPrice);
+        System.out.println("Lowest BestBuy price: $" + bestBestBuyPrice + " " + bestBestBuyName);
 
         System.out.print("\nNewegg Results:");
         System.out.println(" " + neweggURL);
@@ -185,8 +192,23 @@ public class PriceScraper {
                 bestNeweggPrice = entry.getValue();
                 bestNeweggName = entry.getKey();
             }
-            System.out.println(entry.getKey() + " for $" + entry.getValue());
+            System.out.println("$" + entry.getValue() + " " + entry.getKey());
         }
-        System.out.println("Lowest Newegg price: " + bestNeweggName + " for $" + bestNeweggName);
+        System.out.println("Lowest Newegg price: $" + bestNeweggPrice + " " + bestNeweggName);
+        System.out.println();
+        bestOverallPrice = bestAmazonPrice;
+        bestOverallName = bestAmazonName;
+        String brand = "Amazon";
+        if (bestAmazonPrice > bestBestBuyPrice){
+            bestOverallPrice = bestBestBuyPrice;
+            bestOverallName = bestBestBuyName;
+            brand = "BestBuy";
+        }
+        else if (bestBestBuyPrice > bestNeweggPrice){
+            bestOverallPrice = bestNeweggPrice;
+            bestOverallName = bestNeweggName;
+            brand = "Newegg";
+        }
+        System.out.println("The best deal is " + brand + ": $" + bestOverallPrice + " " + bestOverallName);
     }
 }
