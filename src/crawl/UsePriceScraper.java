@@ -10,12 +10,9 @@ public class UsePriceScraper {
         String sentence = input.nextLine();
         PriceScraper priceScraper = new PriceScraper(sentence);
         priceScraper.setURLS();
-//        priceScraper.scrapeAmazon();
-//        priceScraper.scrapeBestBuy();
+        priceScraper.scrapeAmazon();
+        priceScraper.scrapeBestBuy();
         priceScraper.scrapeNewegg();
-
         priceScraper.printPrices();
-
-
     }
 }
